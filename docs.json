@@ -1,35 +1,32 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Xosum.am Օգնություն",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
     "dark": "#15803D"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
         "tab": "Guides",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Սկսենք այստեղից",
             "pages": [
               "index",
               "quickstart",
               "development"
             ]
-          },
+          }, 
           {
-            "group": "Essentials",
+            "group": "Ինչպես օգտագործել",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "index",
+              "quickstart",
+              "development"
             ]
           }
         ]
@@ -47,8 +44,6 @@
             "group": "Endpoint Examples",
             "pages": [
               "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
               "api-reference/endpoint/webhook"
             ]
           }
@@ -63,12 +58,12 @@
           "icon": "book-open-cover"
         },
         {
-          "anchor": "Community",
+          "anchor": "Telegram Բոտ",
           "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "icon": "telegram"
         },
         {
-          "anchor": "Blog",
+          "anchor": "Բլոգ",
           "href": "https://mintlify.com/blog",
           "icon": "newspaper"
         }
@@ -83,13 +78,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@xosum.am"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Գրանցվել",
+      "href": "https://app.xosum.am"
     }
   },
   "footer": {
