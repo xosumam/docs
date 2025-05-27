@@ -17,16 +17,14 @@
             "group": "Սկսենք այստեղից",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "quickstart"
             ]
           }, 
           {
             "group": "Ինչպես օգտագործել",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "usage/code",
+              "usage/images"
             ]
           }
         ]
