@@ -1,97 +1,174 @@
 ---
-title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+title: "Xosum.am API Documentation"
+description: "Comprehensive guide to integrating Armenian audio transcription via the Xosum.am API."
 ---
 
-## Setup your development
+import Alert from '@site/src/components/Alert'
 
-Learn how to update your docs locally and deploy them to the public.
+# 📡 Xosum.am API Guide
 
-### Edit and preview
+Welcome to the **Xosum.am API documentation**. This API allows you to transcribe Armenian audio files by uploading them and receiving transcription results via webhook. It's a simple and powerful way to integrate transcription functionality into your platform.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 
-    1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `docs.json` is): ``` mintlify dev ```
-    <Note>
-      If you’re currently using the legacy ```mint.json``` configuration file, please update the Mintlify CLI:
+---
 
+## 🔐 Authentication
 
-      ```npm i -g mintlify@latest```
-      And run the new upgrade command in your docs repository:
+To use the API, you must:
+- Be on the **Business** plan
+- Have a valid **API key**
+- Set a **webhook URL** and **webhook secret**
 
-      ```mintlify upgrade```
-      You should now be using the new ```docs.json``` configuration file. Feel free to delete the ```mint.json``` file from your repository.
-    </Note>
-  </Accordion>
-</AccordionGroup>
+You can configure these in your account at [app.xosum.am](https://app.xosum.am).
 
-### Deploy your changes
+---
 
-<AccordionGroup>
+## 🛠️ Endpoint
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+### `POST https://app.xosum.am/api/createTranscription`
 
-</AccordionGroup>
+This endpoint generates a signed upload URL and document ID.
 
-## Update your docs
+#### Required Headers
+- `Authorization: Bearer YOUR_API_KEY`
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+#### Required JSON Body
 
-<CardGroup>
+```json
+{
+  "type": "single_voice", // or "phone_call"
+  "metadata": {
+    "custom_key": "optional metadata"
+  }
+}
+```
 
-<Card title="Add Content With MDX" icon="file" href="/essentials/markdown">
-  Add content to your docs with MDX syntax.
-</Card>
+#### Example cURL Request
 
-<Card
-  title="Add Code Blocks"
-  icon="square-code"
-  href="/essentials/code"
->
-  Add code directly to your docs with syntax highlighting.
-</Card>
+```bash
+curl -X POST https://app.xosum.am/api/createTranscription \
+  -H "Authorization: Bearer xosum_abcdef123456" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "type": "single_voice",
+        "metadata": { "filename": "interview1" }
+      }'
+```
 
-<Card
-  title="Add Images"
-  icon="image"
-  href="/essentials/images"
->
-  Add images to your docs to make them more engaging.
-</Card>
+#### Sample Successful Response
 
-<Card
-  title="Add Custom Components"
-  icon="puzzle-piece"
-  href="/essentials/reusable-snippets"
->
-  Add templates to your docs to make them more reusable.
-</Card>
+```json
+{
+  "docId": "XYZ123",
+  "uploadUrl": "https://storage.googleapis.com/..."
+}
+```
 
-</CardGroup>
+---
+
+## 🎧 Uploading the Audio File
+
+Once you receive the `uploadUrl`, use a PUT request to upload your **MP3** audio file.
+
+#### Example using `curl`:
+
+```bash
+curl -X PUT -T ./my-audio.mp3 "https://storage.googleapis.com/..."
+```
+
+<Alert type="info" title="Note">
+Upload must be an **MP3** file. Other formats like WAV/M4A are not supported via API.
+</Alert>
+
+---
+
+## 📬 Receiving Transcription via Webhook
+
+Once the audio is transcribed, we will `POST` a JSON payload to your `webhookURL`.
+
+### Sample Webhook Payload
+
+```json
+{
+  "secret": "your_webhook_secret",
+  "docId": "XYZ123",
+  "transcription": "Սա վերծանված տեքստն է",
+  "metadata": {
+    "filename": "interview1"
+  }
+}
+```
+
+You should:
+- Validate the `secret` matches what you configured
+- Process the transcription
+- Return a `200 OK` response
+
+---
+
+## 📚 Notes & Constraints
+
+- **File Type:** Only `MP3` files accepted
+- **Max Duration:** Limited by your account’s remaining seconds
+- **Languages Supported:** Armenian
+- **Transcription Time:** A few seconds to minutes depending on length
+- **Metadata:** Optional object stored and returned with results
+
+---
+
+## 💻 Code Examples
+
+### Python (Requests)
+
+```python
+import requests
+
+api_key = "xosum_abcdef123456"
+endpoint = "https://app.xosum.am/api/createTranscription"
+headers = { "Authorization": f"Bearer {api_key}" }
+
+payload = {
+  "type": "single_voice",
+  "metadata": { "filename": "my-audio.mp3" }
+}
+
+response = requests.post(endpoint, headers=headers, json=payload)
+print(response.json())
+```
+
+### Node.js (Axios)
+
+```javascript
+const axios = require("axios");
+
+const res = await axios.post(
+  "https://app.xosum.am/api/createTranscription",
+  {
+    type: "single_voice",
+    metadata: { filename: "my-audio.mp3" }
+  },
+  {
+    headers: {
+      Authorization: "Bearer xosum_abcdef123456"
+    }
+  }
+);
+console.log(res.data);
+```
+
+---
+
+## 🧪 Testing
+
+To test your integration:
+1. Use [Postman](https://postman.com) or `curl` to simulate requests.
+2. Set a development webhook URL (like from [webhook.site](https://webhook.site/)) to inspect payloads.
+
+---
+
+## 📞 Need Help?
+
+Contact us via [support@xosum.am](mailto:support@xosum.am) or [visit the help center](https://help.xosum.am)
+
+---
+
+_© 2025 Xosum.am_
