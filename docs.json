@@ -7,11 +7,11 @@
     "light": "#07C983",
     "dark": "#15803D"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "favicon.ico",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Ձեռնարկներ",
         "groups": [
           {
             "group": "Սկսենք այստեղից",
