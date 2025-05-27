@@ -53,18 +53,13 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
           "anchor": "Telegram Բոտ",
-          "href": "https://mintlify.com/community",
+          "href": "https:t.me/xosumam_bot",
           "icon": "telegram"
         },
         {
           "anchor": "Բլոգ",
-          "href": "https://mintlify.com/blog",
+          "href": "https://xosum.am/blog",
           "icon": "newspaper"
         }
       ]
@@ -77,7 +72,7 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
+        "label": "Օգնություն",
         "href": "mailto:support@xosum.am"
       }
     ],
@@ -89,9 +84,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "telegram": "https://t.me/xosumam_bot",
+      "linkedin": "https://linkedin.com/company/xosumam"
     }
   }
 }
