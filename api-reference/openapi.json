@@ -32,7 +32,7 @@ components:
           type: object
           description: Optional metadata to attach to the transcription (e.g., user IDs, external info).
           example:
-            phonenumber: "+374000000"
+            phonenumber: "+37400000000"
             agent: "King Ruzi"
 
     CreateTranscriptionResponse:
@@ -62,8 +62,8 @@ components:
           type: object
           description: Metadata passed during creation.
           example:
-            phonenumber: "+37498282838"
-            agent: "Gagoy Tsarukyan"
+            phonenumber: "+37400000000"
+            agent: "King Ruzi"
 
 security:
   - BearerAuth: []
