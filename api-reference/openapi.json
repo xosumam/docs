@@ -2,7 +2,9 @@ openapi: 3.0.3
 info:
   title: Xosum.am API
   description: >
-    API-ն թույլ է տալիս ստեղծել վերծանման առաջադրանքներ և ստանալ արդյունքներ ավտոմատ webhook ծանուցման միջոցով։
+    The Xosum.am API allows business users to programmatically upload audio for transcription 
+    and receive results automatically via secure webhooks. Authentication is handled via Bearer API keys.  
+    API access is available only to Business plan users.
   version: 1.0.0
 servers:
   - url: https://app.xosum.am
@@ -14,6 +16,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: API Key
+
   schemas:
     CreateTranscriptionRequest:
       type: object
@@ -23,35 +26,39 @@ components:
         type:
           type: string
           enum: [single_voice, phone_call]
-          description: Վերծանման տեսակը (մեկ ձայն կամ երկխոսություն)
+          description: The type of audio to be transcribed. Use `single_voice` for monologues, `phone_call` for conversations.
         metadata:
           type: object
-          description: Ցանկացած լրացուցիչ մետադատա (օրինակ՝ external ID, լեզու)
+          additionalProperties: true
+          description: Optional metadata to attach to the transcription (e.g. userId, externalRef).
+
     CreateTranscriptionResponse:
       type: object
       properties:
         docId:
           type: string
-          description: Ստեղծված ձայնագրության ID
+          description: The unique ID of the transcription record created.
         uploadUrl:
           type: string
           format: uri
-          description: S3-compatible ստորագրված հղում ֆայլը վերբեռնելու համար
+          description: Signed URL to upload the audio file (must be MP3 format).
+
     WebhookTranscriptionPayload:
       type: object
       properties:
         secret:
           type: string
-          description: Webhook գաղտնիք՝ հաստատման համար
+          description: The webhook secret used to validate authenticity of the call.
         docId:
           type: string
-          description: Վերծանված ձայնագրության ID
+          description: The document ID of the transcription.
         transcription:
           type: string
-          description: Վերծանված ամբողջական տեքստը
+          description: The full transcribed text.
         metadata:
           type: object
-          description: Օգտագործողի կողմից ուղարկված մետադատա
+          additionalProperties: true
+          description: The metadata originally submitted with the transcription request.
 
 security:
   - BearerAuth: []
@@ -59,7 +66,7 @@ security:
 paths:
   /api/createTranscription:
     post:
-      summary: Ստեղծել վերծանման խնդրանք
+      summary: Create a new transcription job
       tags:
         - Transcription
       security:
@@ -72,24 +79,25 @@ paths:
               $ref: '#/components/schemas/CreateTranscriptionRequest'
       responses:
         '200':
-          description: Վերծանման խնդրանքը հաջողությամբ ստեղծվել է
+          description: Successfully created transcription job
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateTranscriptionResponse'
         '400':
-          description: Սխալ մուտքային տվյալներ
+          description: Invalid request payload
         '401':
-          description: Վավերացման սխալ
+          description: Unauthorized – missing or invalid API key
         '500':
-          description: Սերվերի սխալ
+          description: Server error
 
   /your-webhook-url:
     post:
-      summary: Վերծանման արդյունքի ավտոմատ ուղարկում
+      summary: Transcription result webhook
       description: >
-        Այս endpoint-ը պետք է տրամադրվի ձեր կողմից։ xosum.am-ը կուղարկի վերծանման արդյունքները
-        հենց որ պատրաստ լինեն։
+        This endpoint should be hosted by your system. Xosum.am will make a POST request 
+        to this URL when a transcription result is ready. The request will contain a webhook secret 
+        and the transcription content.
       requestBody:
         required: true
         content:
@@ -98,7 +106,6 @@ paths:
               $ref: '#/components/schemas/WebhookTranscriptionPayload'
       responses:
         '200':
-          description: Հաջող ստացում
+          description: Webhook received successfully
         '400':
-          description: Սխալ տվյալներ կամ գաղտնիքի մերժում
-
+          description: Invalid data or failed secret verification
