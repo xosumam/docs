@@ -2,9 +2,10 @@ openapi: 3.0.3
 info:
   title: Xosum.am API
   description: >
-    The Xosum.am API allows business users to programmatically upload audio for transcription 
-    and receive results automatically via secure webhooks. Authentication is handled via Bearer API keys.  
-    API access is available only to Business plan users.
+    The Xosum.am API enables business customers to upload audio for transcription and receive results via webhook.  
+    All transcription results are also accessible via the web interface at [https://app.xosum.am](https://app.xosum.am).
+
+    API access is exclusive to Business plan users. Authentication is handled via Bearer API keys.
   version: 1.0.0
 servers:
   - url: https://app.xosum.am
@@ -29,36 +30,40 @@ components:
           description: The type of audio to be transcribed. Use `single_voice` for monologues, `phone_call` for conversations.
         metadata:
           type: object
-          additionalProperties: true
-          description: Optional metadata to attach to the transcription (e.g. userId, externalRef).
+          description: Optional metadata to attach to the transcription (e.g., user IDs, external info).
+          example:
+            phonenumber: "+37498282838"
+            agent: "Gagoy Tsarukyan"
 
     CreateTranscriptionResponse:
       type: object
       properties:
         docId:
           type: string
-          description: The unique ID of the transcription record created.
+          description: Unique ID for the created transcription job.
         uploadUrl:
           type: string
           format: uri
-          description: Signed URL to upload the audio file (must be MP3 format).
+          description: Signed URL for uploading the `.mp3` audio file.
 
     WebhookTranscriptionPayload:
       type: object
       properties:
         secret:
           type: string
-          description: The webhook secret used to validate authenticity of the call.
+          description: Webhook secret to validate authenticity.
         docId:
           type: string
-          description: The document ID of the transcription.
+          description: Transcription job ID.
         transcription:
           type: string
-          description: The full transcribed text.
+          description: The full text result of the transcription.
         metadata:
           type: object
-          additionalProperties: true
-          description: The metadata originally submitted with the transcription request.
+          description: Metadata passed during creation.
+          example:
+            phonenumber: "+37498282838"
+            agent: "Gagoy Tsarukyan"
 
 security:
   - BearerAuth: []
@@ -93,11 +98,13 @@ paths:
 
   /your-webhook-url:
     post:
-      summary: Transcription result webhook
+      summary: Webhook callback for transcription results
       description: >
-        This endpoint should be hosted by your system. Xosum.am will make a POST request 
-        to this URL when a transcription result is ready. The request will contain a webhook secret 
-        and the transcription content.
+        Xosum.am will send a POST request to this URL once a transcription is complete.  
+        This endpoint **does not require** any Authorization header.  
+        Use the `secret` field to verify the source.
+
+        Note: This is a callback URL provided by the user and is not part of the public Xosum.am API.
       requestBody:
         required: true
         content:
@@ -106,6 +113,6 @@ paths:
               $ref: '#/components/schemas/WebhookTranscriptionPayload'
       responses:
         '200':
-          description: Webhook received successfully
+          description: Webhook received and acknowledged
         '400':
-          description: Invalid data or failed secret verification
+          description: Bad request or invalid webhook secret
