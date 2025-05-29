@@ -53,12 +53,12 @@
         {
           "anchor": "Կայք",
           "href": "https:xosum.am",
-          "icon": "web"
+          "icon": "globe-pointer"
         },
         {
           "anchor": "Մուտք գործել",
           "href": "https:app.xosum.am/login",
-          "icon": "enter"
+          "icon": "right-to-bracket"
         },
         {
           "anchor": "Telegram Բոտ",
