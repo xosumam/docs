@@ -86,13 +86,14 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Գրանցվել",
+      "label": "Գրանցվել կամ մուտք գործել",
       "href": "https://app.xosum.am"
     }
   },
   "footer": {
     "socials": {
       "telegram": "https://t.me/xosumam_bot",
+      "facebook": "https://www.facebook.com/xosumam",
       "linkedin": "https://linkedin.com/company/xosumam"
     }
   }
