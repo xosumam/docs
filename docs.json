@@ -16,8 +16,7 @@
           {
             "group": "Սկսենք այստեղից",
             "pages": [
-              "index",
-              "quickstart"
+              "index"
             ]
           }, 
           {
@@ -40,7 +39,8 @@
           {
             "group": "Endpoint Examples",
             "pages": [
-              "api-reference/endpoint/get"
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/webhook"
             ]
           }
         ]
@@ -50,17 +50,17 @@
       "anchors": [
         {
           "anchor": "Կայք",
-          "href": "https:xosum.am",
+          "href": "https://xosum.am",
           "icon": "globe-pointer"
         },
         {
           "anchor": "Մուտք գործել",
-          "href": "https:app.xosum.am/login",
+          "href": "https://app.xosum.am/login",
           "icon": "right-to-bracket"
         },
         {
           "anchor": "Telegram Բոտ",
-          "href": "https:t.me/xosumam_bot",
+          "href": "https://t.me/xosumam_bot",
           "icon": "telegram"
         },
         {
