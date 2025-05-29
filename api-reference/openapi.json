@@ -1,64 +1,104 @@
 openapi: 3.0.3
 info:
-  title: Xosum.am Transcription API
-  description: API to upload audio for transcription and receive results via webhook.
+  title: Xosum.am API
+  description: >
+    API-ն թույլ է տալիս ստեղծել վերծանման առաջադրանքներ և ստանալ արդյունքներ ավտոմատ webhook ծանուցման միջոցով։
   version: 1.0.0
-
 servers:
   - url: https://app.xosum.am
+    description: Production server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+  schemas:
+    CreateTranscriptionRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [single_voice, phone_call]
+          description: Վերծանման տեսակը (մեկ ձայն կամ երկխոսություն)
+        metadata:
+          type: object
+          description: Ցանկացած լրացուցիչ մետադատա (օրինակ՝ external ID, լեզու)
+    CreateTranscriptionResponse:
+      type: object
+      properties:
+        docId:
+          type: string
+          description: Ստեղծված ձայնագրության ID
+        uploadUrl:
+          type: string
+          format: uri
+          description: S3-compatible ստորագրված հղում ֆայլը վերբեռնելու համար
+    WebhookTranscriptionPayload:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Webhook գաղտնիք՝ հաստատման համար
+        docId:
+          type: string
+          description: Վերծանված ձայնագրության ID
+        transcription:
+          type: string
+          description: Վերծանված ամբողջական տեքստը
+        metadata:
+          type: object
+          description: Օգտագործողի կողմից ուղարկված մետադատա
+
+security:
+  - BearerAuth: []
 
 paths:
   /api/createTranscription:
     post:
-      summary: Create a transcription request
-      description: Generates a signed upload URL for an MP3 audio file. Once uploaded, transcription is performed and sent to your webhook.
-      operationId: createTranscription
+      summary: Ստեղծել վերծանման խնդրանք
       tags:
         - Transcription
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - type
-              properties:
-                type:
-                  type: string
-                  description: Type of transcription.
-                  enum: [single_voice, phone_call]
-                metadata:
-                  type: object
-                  description: Optional metadata to attach to the transcription.
+              $ref: '#/components/schemas/CreateTranscriptionRequest'
       responses:
         '200':
-          description: Upload URL and document ID successfully created.
+          description: Վերծանման խնդրանքը հաջողությամբ ստեղծվել է
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  docId:
-                    type: string
-                    example: XYZ123
-                  uploadUrl:
-                    type: string
-                    format: uri
-                    example: https://storage.googleapis.com/...
+                $ref: '#/components/schemas/CreateTranscriptionResponse'
         '400':
-          description: Bad request - missing or invalid parameters.
+          description: Սխալ մուտքային տվյալներ
         '401':
-          description: Unauthorized - invalid or missing API key.
-        '405':
-          description: Method not allowed - only POST is supported.
-      security:
-        - bearerAuth: []
+          description: Վավերացման սխալ
+        '500':
+          description: Սերվերի սխալ
 
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: API Key
+  /your-webhook-url:
+    post:
+      summary: Վերծանման արդյունքի ավտոմատ ուղարկում
+      description: >
+        Այս endpoint-ը պետք է տրամադրվի ձեր կողմից։ xosum.am-ը կուղարկի վերծանման արդյունքները
+        հենց որ պատրաստ լինեն։
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookTranscriptionPayload'
+      responses:
+        '200':
+          description: Հաջող ստացում
+        '400':
+          description: Սխալ տվյալներ կամ գաղտնիքի մերժում
 
