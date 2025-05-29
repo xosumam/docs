@@ -51,6 +51,16 @@
     "global": {
       "anchors": [
         {
+          "anchor": "Կայք",
+          "href": "https:xosum.am",
+          "icon": "web"
+        },
+        {
+          "anchor": "Մուտք գործել",
+          "href": "https:app.xosum.am/login",
+          "icon": "enter"
+        },
+        {
           "anchor": "Telegram Բոտ",
           "href": "https:t.me/xosumam_bot",
           "icon": "telegram"
