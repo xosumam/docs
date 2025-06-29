@@ -57,13 +57,23 @@ components:
           description: Transcription job ID.
         transcription:
           type: string
-          description: The full text result of the transcription.
+          description: The fully diarized text result of the transcription.
         metadata:
           type: object
           description: Metadata passed during creation.
           example:
             phonenumber: "+37400000000"
             agent: "King Ruzi"
+        title:
+          type: string
+          description: Short title automatically generated from the transcript.
+        resolution:
+          type: string
+          description:  Concise summary/resolution for the call
+        link:
+          type: string
+          format: uri
+          description: Direct URL to the recording details inside Xosum.am.
 
 security:
   - BearerAuth: []
