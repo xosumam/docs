@@ -8,8 +8,8 @@ info:
     API access is exclusive to Business plan users. Authentication is handled via Bearer API keys.
   version: 1.0.0
 servers:
-  - url: https://us-central1-xosumam-uscentral1.cloudfunctions.net/apiUploadAudio
-    description: Production server for creating transcription jobs
+  - url: https://app.xosum.am/api/
+    description: Production server for creating transcription jobs through public API
   - url: https://app.xosum.am
     description: Web Application URL for viewing results
 
@@ -88,7 +88,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /:  # This corresponds to the root of the cloud function URL
+  /api/createTranscription:  # This corresponds to the root of the cloud function URL
     post:
       summary: Create a new transcription job
       operationId: createTranscription
