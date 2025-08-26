@@ -2,14 +2,16 @@ openapi: 3.0.3
 info:
   title: Xosum.am API
   description: >
-    The Xosum.am API enables business customers to upload audio for transcription and receive results via webhook.  
+    The Xosum.am API enables business customers to upload audio for transcription and receive results via webhook.
     All transcription results are also accessible via the web interface at [https://app.xosum.am](https://app.xosum.am).
 
     API access is exclusive to Business plan users. Authentication is handled via Bearer API keys.
   version: 1.0.0
 servers:
+  - url: https://us-central1-xosumam-uscentral1.cloudfunctions.net/apiUploadAudio
+    description: Production server for creating transcription jobs
   - url: https://app.xosum.am
-    description: Production server
+    description: Web Application URL for viewing results
 
 components:
   securitySchemes:
@@ -34,6 +36,13 @@ components:
           example:
             phonenumber: "+37400000000"
             agent: "King Ruzi"
+        checklistId:
+          type: string
+          description: >
+            Optional. The ID of a QA Checklist to run an automated analysis on the transcript.
+            You can find the Checklist ID in the "QA Ստուգացուցակներ" (QA Checklists) section of the Xosum.am web app.
+            The results of the analysis will be available in the "History" page of the web app after the transcription is complete.
+          example: "a1B2c3D4e5F6g7H8i9J0"
 
     CreateTranscriptionResponse:
       type: object
@@ -44,7 +53,7 @@ components:
         uploadUrl:
           type: string
           format: uri
-          description: Signed URL for uploading the `.mp3` audio file.
+          description: A pre-signed URL for uploading the `.mp3` audio file using a PUT request. This URL is valid for 1 hour.
 
     WebhookTranscriptionPayload:
       type: object
@@ -69,7 +78,7 @@ components:
           description: Short title automatically generated from the transcript.
         resolution:
           type: string
-          description:  Concise summary/resolution for the call
+          description: A concise summary or resolution for the call.
         link:
           type: string
           format: uri
@@ -79,9 +88,10 @@ security:
   - BearerAuth: []
 
 paths:
-  /api/createTranscription:
+  /:  # This corresponds to the root of the cloud function URL
     post:
       summary: Create a new transcription job
+      operationId: createTranscription
       tags:
         - Transcription
       security:
@@ -94,24 +104,26 @@ paths:
               $ref: '#/components/schemas/CreateTranscriptionRequest'
       responses:
         '200':
-          description: Successfully created transcription job
+          description: Successfully created transcription job and received an upload URL.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateTranscriptionResponse'
         '400':
-          description: Invalid request payload
+          description: Invalid request payload.
         '401':
-          description: Unauthorized – missing or invalid API key
+          description: Unauthorized – missing or invalid API key.
+        '403':
+          description: Forbidden – The provided `checklistId` is invalid or does not belong to the authenticated user.
         '500':
-          description: Server error
+          description: Server error.
 
   /your-webhook-url:
     post:
       summary: Webhook callback for transcription results
       description: >
-        Xosum.am will send a POST request to this URL once a transcription is complete.  
-        This endpoint **does not require** any Authorization header.  
+        Xosum.am will send a POST request to this URL once a transcription is complete.
+        This endpoint **does not require** any Authorization header.
         Use the `secret` field to verify the source.
 
         Note: This is a callback URL provided by the user and is not part of the public Xosum.am API.
@@ -123,6 +135,6 @@ paths:
               $ref: '#/components/schemas/WebhookTranscriptionPayload'
       responses:
         '200':
-          description: Webhook received and acknowledged
+          description: Webhook received and acknowledged.
         '400':
-          description: Bad request or invalid webhook secret
+          description: Bad request or invalid webhook secret.
