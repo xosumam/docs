@@ -58,6 +58,10 @@ components:
     WebhookTranscriptionPayload:
       type: object
       properties:
+        event_type:
+          type: string
+          enum: [transcript_ready]
+          description: Event type for transcription completion.
         secret:
           type: string
           description: Webhook secret to validate authenticity.
@@ -79,6 +83,64 @@ components:
         resolution:
           type: string
           description: A concise summary or resolution for the call.
+        link:
+          type: string
+          format: uri
+          description: Direct URL to the recording details inside Xosum.am.
+
+    AnalysisResultEntry:
+      type: object
+      description: >
+        One checklist question result entry. The shape depends on checklist question type:
+        - yes_no: answer is "yes" | "no" | "cannot_tell"
+        - grade_1_10: answer is a number (typically 1-10)
+      properties:
+        answer:
+          oneOf:
+            - type: string
+            - type: number
+          description: The answer value for the checklist question.
+        comment:
+          type: string
+          description: Brief justification (often includes quotes/reasoning).
+        question:
+          type: string
+          nullable: true
+          description: The human-readable question text (enriched by the backend when available).
+
+    WebhookAnalysisPayload:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum: [analysis_ready]
+          description: Event type for checklist analysis completion.
+        secret:
+          type: string
+          description: Webhook secret to validate authenticity.
+        docId:
+          type: string
+          description: Transcription/recording job ID.
+        analysisId:
+          type: string
+          description: Analysis document ID.
+        metadata:
+          type: object
+          description: Metadata passed during creation.
+        checklistId:
+          type: string
+          nullable: true
+          description: Checklist ID used for this analysis (if present).
+        checklistName:
+          type: string
+          nullable: true
+          description: Checklist name snapshot captured at analysis time (if present).
+        results:
+          type: object
+          description: >
+            Map keyed by checklist question ID, where each value contains the analysis result.
+          additionalProperties:
+            $ref: '#/components/schemas/AnalysisResultEntry'
         link:
           type: string
           format: uri
@@ -133,6 +195,27 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WebhookTranscriptionPayload'
+      responses:
+        '200':
+          description: Webhook received and acknowledged.
+        '400':
+          description: Bad request or invalid webhook secret.
+
+  /your-analysis-webhook-url:
+    post:
+      summary: Webhook callback for checklist analysis results
+      description: >
+        Xosum.am will send a POST request to this URL once a checklist-based analysis is complete.
+        This endpoint **does not require** any Authorization header.
+        Use the `secret` field to verify the source.
+
+        Note: This is a callback URL provided by the user and is not part of the public Xosum.am API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookAnalysisPayload'
       responses:
         '200':
           description: Webhook received and acknowledged.
