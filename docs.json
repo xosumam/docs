@@ -9,6 +9,30 @@
   },
   "favicon": "favicon.ico",
   "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Կայք",
+          "icon": "globe-pointer",
+          "href": "https://xosum.am"
+        },
+        {
+          "anchor": "Մուտք գործել",
+          "icon": "right-to-bracket",
+          "href": "https://app.xosum.am/login"
+        },
+        {
+          "anchor": "Telegram Բոտ",
+          "icon": "telegram",
+          "href": "https://t.me/xosumam_bot"
+        },
+        {
+          "anchor": "Բլոգ",
+          "icon": "newspaper",
+          "href": "https://xosum.am/blog"
+        }
+      ]
+    },
     "tabs": [
       {
         "tab": "Ձեռնարկներ",
@@ -18,7 +42,7 @@
             "pages": [
               "index"
             ]
-          }, 
+          },
           {
             "group": "Ինչպես օգտագործել",
             "pages": [
@@ -39,37 +63,14 @@
           {
             "group": "Endpoint Examples",
             "pages": [
+              "api-reference/endpoint-examples/receive-analysis",
               "api-reference/endpoint/get",
               "api-reference/endpoint/webhook"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Կայք",
-          "href": "https://xosum.am",
-          "icon": "globe-pointer"
-        },
-        {
-          "anchor": "Մուտք գործել",
-          "href": "https://app.xosum.am/login",
-          "icon": "right-to-bracket"
-        },
-        {
-          "anchor": "Telegram Բոտ",
-          "href": "https://t.me/xosumam_bot",
-          "icon": "telegram"
-        },
-        {
-          "anchor": "Բլոգ",
-          "href": "https://xosum.am/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/xosumAM_logo_transparent-min.png",
