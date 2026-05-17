@@ -1,0 +1,19 @@
+---
+title: 'Receive Transcription'
+openapi: 'POST /your-webhook-url'
+icon: 'webhook'
+---
+
+<Info>
+  **You host this endpoint.** This page documents the request that **Xosum sends to you** — to a URL you provide and operate on your own infrastructure. The path `/your-webhook-url` is a placeholder for whatever publicly-reachable URL you configure in your account at [app.xosum.am](https://app.xosum.am). Xosum does not host this URL.
+</Info>
+
+When a transcription job finishes, Xosum sends a `POST` request to your configured webhook URL with the payload below. Your endpoint should:
+
+1. **Verify the `secret` field** matches the `webhookSecret` configured in your Xosum account, and reject the request otherwise.
+2. **Return `200 OK` quickly.** Acknowledge first, process asynchronously — Xosum does not retry indefinitely, so don't tie up the connection while you do downstream work.
+3. **Be prepared for two content shapes in `transcription`.** The JSON envelope is identical regardless of recording type, but the text inside `transcription` differs:
+   - For `type: single_voice`, the text is **plain** (no speaker labels).
+   - For `type: phone_call`, the text is **diarized** with inline `Խոսնակ 1:` / `Խոսնակ 2:` speaker labels.
+
+If you can't host a publicly reachable endpoint, use the polling option at [`GET /api/getTranscription`](/api-reference/endpoint/get-transcription) instead.

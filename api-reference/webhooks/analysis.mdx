@@ -1,0 +1,11 @@
+---
+title: 'Receive Analysis'
+openapi: 'POST /your-analysis-webhook-url'
+icon: 'webhook'
+---
+
+<Info>
+  **You host this endpoint.** Xosum sends this payload to a webhook URL **you** host whenever a checklist analysis finishes for a transcription that was created with a `checklistId`. The path `/your-analysis-webhook-url` is a placeholder for whatever publicly-reachable URL you configure in your account.
+</Info>
+
+Verify the `secret` field matches your `webhookSecret`, return `200 OK` quickly, and process the `results` map asynchronously. Each entry in `results` is keyed by the checklist question ID; see `AnalysisResultEntry` in the schema below for the per-question shape.

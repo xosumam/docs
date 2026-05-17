@@ -1,0 +1,16 @@
+---
+title: 'Create Transcription'
+openapi: 'POST /api/createTranscription'
+---
+
+Creates a transcription job and returns a `docId` plus a pre-signed `uploadUrl`. Upload your `.mp3` to that URL via `PUT` (the URL is valid for 1 hour) to begin processing.
+
+The `type` field controls how the resulting transcript is shaped:
+
+- **`single_voice`** — plain transcript with no speaker labels. Use for monologues, dictations, voicemails, or any single-speaker audio.
+- **`phone_call`** — diarized transcript with inline `Խոսնակ 1:` / `Խոսնակ 2:` speaker labels, pinned to exactly two speakers. Use for two-party conversations (support, sales, interview calls).
+
+Once processing finishes, the result is available two ways — pick whichever fits your environment:
+
+- **Webhook (push)** — Xosum POSTs the transcript to a URL you host. See [Receive Transcription](/api-reference/webhooks/transcription).
+- **Polling (pull)** — call [`GET /api/getTranscription`](/api-reference/endpoint/get-transcription) with the `docId` until `status` is `transcribed`. Recommended when you can't expose a publicly reachable webhook receiver.

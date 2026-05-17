@@ -42,12 +42,6 @@
             "pages": [
               "index"
             ]
-          },
-          {
-            "group": "Ինչպես օգտագործել",
-            "pages": [
-              "essentials/code"
-            ]
           }
         ]
       },
@@ -55,17 +49,23 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint-examples/receive-analysis",
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/webhook"
+              "api-reference/endpoint/create-transcription",
+              "api-reference/endpoint/get-transcription"
+            ]
+          },
+          {
+            "group": "Webhooks (you host these)",
+            "pages": [
+              "api-reference/webhooks/transcription",
+              "api-reference/webhooks/analysis"
             ]
           }
         ]

@@ -1,59 +1,309 @@
 ---
-title: API Ներածություն
-description: Սովորեք՝ ինչպես ինտեգրվել xosum.am API-ի միջոցով և ստանալ ավտոմատ վերծանումներ ձեր բիզնեսում։
-icon: "webhook"
+title: 'Introduction'
+description: 'End-to-end guide to integrating Xosum.am audio transcription via the public API.'
+icon: 'code'
 ---
 
-## 📡 API ինտեգրում xosum.am-ի հետ
+Welcome to the **Xosum.am API**. This API lets you transcribe Armenian audio files end-to-end: create a job, upload an `.mp3`, and receive the transcript either pushed to a webhook you host or pulled via polling.
 
-**xosum.am API-ն** նախատեսված է կազմակերպությունների և բիզնես լուծումների համար, ովքեր ցանկանում են ավտոմատացնել ձայնային ֆայլերի վերծանման պրոցեսները՝ բարձր անվտանգությամբ և պարզ ինտեգրացիայով։
-
-API-ն հասանելի է միայն մեր **Business** պլանի օգտվողներին։ Ինտեգրման համար խնդրում ենք կապ հաստատել մեզ հետ՝ 👉 [Կապ մեզ հետ](https://tally.so/r/3Evk5L?source=api_request_docs)
-
----
-
-## 🔐 Անվտանգություն և վավերացում
-
-Մենք առաջին հերթին կարևորում ենք տվյալների **անվտանգությունը**։ Ձեր API մուտքը ապահովված է **Bearer Authentication** մեխանիզմով, որը ստանդարտ և անվտանգ մուքտի ձև է։
-
-🔑 Բոլոր API կանչերը պահանջում են հատուկ ստեղծված API բանալի, որը դուք կարող եք ստանալ ձեր հաշվի կարգավորումներից։  
-📩 Յուրաքանչյուր վերծանման արդյունքը կարող է ավտոմատ առաքվել webhook-ի միջոցով՝ հավելյալ գաղտնիությամբ։
+<Info>
+  **API access is exclusive to Business-plan customers.** Don't have access yet? [Request it here](https://tally.so/r/3Evk5L?source=api_request_docs) and we'll be in touch.
+</Info>
 
 ---
 
-## 🧠 Ի՞նչ կարող եք անել API-ով
+## 🌐 Base URL
 
-### ➕ `POST /api/createTranscription`
+All API endpoints are served from a single base URL:
 
-Ստեղծեք նոր վերծանման խնդրանք API-ի միջոցով՝ պարզ POST հարցումով։ Դուք կստանաք անվտանգ վերբեռնումի հղում (`uploadUrl`), որին կարող եք ուղարկել ձեր ձայնային ֆայլը։ Մշակումը սկսվում է ավտոմատ կերպով։
+```
+https://app.xosum.am
+```
 
-📌 Տվյալ պահին աջակցվում է միայն `.mp3` ֆորմատը։
+Combine this with the path of any endpoint to get the full URL. For example:
 
----
+| Endpoint | Full URL |
+| --- | --- |
+| `POST /api/createTranscription` | `https://app.xosum.am/api/createTranscription` |
+| `GET /api/getTranscription` | `https://app.xosum.am/api/getTranscription?docId=...` |
 
-### 📬 Webhook ծանուցում
-
-Որպեսզի ստանաք **ավտոմատ ծանուցում** (webhook) երբ վերծանումը պատրաստ է, տրամադրեք ձեր `webhookURL`-ը։  
-Մեր համակարգը կուղարկի ձեզ վերծանման տեքստը, լեզուն, և մետադատան POST հարցման միջոցով։
-
-Բոլոր webhook հարցումները ստորագրված են ձեր գաղտնիքով՝ `webhookSecret`, որը կարող եք գտնել կարգավորումներում, հավելյալ անվտանգության համար։ 
-
----
-
-## ⚙️ Օգտակար տեղեկություններ
-
-| Տարր            | Նկարագրություն |
-|------------------|----------------|
-| 🔒 Վավերացում    | Bearer Token՝ ձեր API բանալին |
-| 📁 Ֆայլի ֆորմատ | միայն MP3 (`audio/mpeg`) |
-| 🚀 Մշակման արագություն | 5-10 րոպե՝ 1 ժամ ձայնի համար |
-| 🌐 Ստանդարտներ | SSL (TLS 1.2), HTTPS, Webhook Secret |
+The "Try it" buttons in the API Reference automatically use this base URL — just paste your API key and click send.
 
 ---
 
-## 🤝 Պատրաստ եք սկսել?
+## 🔐 Authentication
 
-API ինտեգրման համար կապ հաստատեք մեզ հետ՝ օգտագործելով [հարցման ձևը](https://tally.so/r/3Evk5L?source=api_request_docs)։
+To use the API you need:
 
-> 📘 Հաջորդ էջերում դուք կգտնեք API endpoint-ների մանրամասն բացատրությունը և օրինակներ։ (տերմինաբանությունը ճիշտ պահելու համար, API-ի տեխնիկական փաստաթղթերը ներկայացված են անգլերենով։ Հայերեն տարբերակի համար, խնդրում ենք դիմել մեզ։)
+- A **Business plan** account at [app.xosum.am](https://app.xosum.am). If you don't have one yet, [request access](https://tally.so/r/3Evk5L?source=api_request_docs).
+- A **Bearer API key**, generated from your account settings.
 
+That's the minimum. You also need to decide how you want to receive transcription results:
+
+- **Webhook (push)** — set a `webhookURL` and `webhookSecret` in your account. Xosum will POST the transcript to your URL when it's ready. Lower latency, but you must host a publicly reachable endpoint.
+- **Polling (pull)** — no webhook setup needed. Poll `GET /api/getTranscription` until the job is done. Simpler when you can't expose a public receiver (e.g. you're behind Cloudflare with strict IP-whitelisting requirements).
+
+You can switch between the two at any time without re-creating keys.
+
+---
+
+## 🛠️ Create a Transcription Job
+
+### `POST https://app.xosum.am/api/createTranscription`
+
+This endpoint generates a signed upload URL and a `docId` you'll use to track the job.
+
+#### Required Headers
+
+- `Authorization: Bearer YOUR_API_KEY`
+
+#### Required JSON Body
+
+```json
+{
+  "type": "single_voice",
+  "metadata": {
+    "custom_key": "optional metadata"
+  }
+}
+```
+
+The `type` field is required and also controls how the resulting transcript is shaped:
+
+- **`single_voice`** → plain transcript, no speaker labels. Use for monologues, dictations, single-speaker recordings.
+- **`phone_call`** → diarized transcript with inline `Խոսնակ 1:` / `Խոսնակ 2:` speaker labels, pinned to exactly two speakers. Use for two-party conversations.
+
+#### Example cURL Request
+
+```bash
+curl -X POST https://app.xosum.am/api/createTranscription \
+  -H "Authorization: Bearer xosum_abcdef123456" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "type": "single_voice",
+        "metadata": { "filename": "interview1" }
+      }'
+```
+
+#### Sample Successful Response
+
+```json
+{
+  "docId": "XYZ123",
+  "uploadUrl": "https://storage.googleapis.com/..."
+}
+```
+
+The `uploadUrl` is a pre-signed URL valid for **1 hour**. Upload your file within that window.
+
+---
+
+## 🎧 Upload the Audio File
+
+Use a `PUT` request to upload your **MP3** file to the `uploadUrl`.
+
+```bash
+curl -X PUT -T ./my-audio.mp3 "https://storage.googleapis.com/..."
+```
+
+<Note>
+  Upload must be an **MP3** file. Other formats like WAV/M4A are not supported via the API.
+</Note>
+
+---
+
+## 📬 Option A — Receive the Transcript via Webhook
+
+Once the audio is transcribed, Xosum sends a `POST` to **your** webhook URL (the one you configured at [app.xosum.am](https://app.xosum.am)). The path `/your-webhook-url` referenced in the API reference is just a placeholder — Xosum does not host this endpoint, **you do**.
+
+### Sample Webhook Payload
+
+```json
+{
+  "event_type": "transcript_ready",
+  "secret": "your_webhook_secret",
+  "docId": "XYZ123",
+  "transcription": "Սա վերծանված տեքստն է",
+  "metadata": { "filename": "interview1" },
+  "title": "...",
+  "resolution": "...",
+  "link": "https://app.xosum.am/recording-details/XYZ123"
+}
+```
+
+Your endpoint should:
+
+- Validate the `secret` matches what you configured, and reject otherwise.
+- Return `200 OK` quickly — process asynchronously if needed.
+- Be prepared for two possible content shapes in `transcription`: plain text for `single_voice`, or diarized text with `Խոսնակ N:` labels for `phone_call`. The JSON envelope is identical; only the text content differs.
+
+There are no automatic retries from Xosum's side, so if your endpoint is down when the webhook fires you'll need to fall back to the polling endpoint below to recover the transcript.
+
+---
+
+## 🔄 Option B — Poll for the Transcript
+
+If you can't host a public webhook receiver, poll `GET /api/getTranscription?docId=...` until `status` becomes `transcribed` or `failed`.
+
+```bash
+curl -H "Authorization: Bearer $XOSUM_API_KEY" \
+  "https://app.xosum.am/api/getTranscription?docId=XYZ123"
+```
+
+Sample response while still processing:
+
+```json
+{
+  "docId": "XYZ123",
+  "status": "processing",
+  "createdAt": "2026-05-17T16:22:23.892Z",
+  "type": "single_voice",
+  "duration": null,
+  "metadata": { "filename": "interview1" }
+}
+```
+
+Sample response once complete:
+
+```json
+{
+  "docId": "XYZ123",
+  "status": "transcribed",
+  "createdAt": "2026-05-17T16:22:23.892Z",
+  "type": "single_voice",
+  "duration": 62,
+  "metadata": { "filename": "interview1" },
+  "transcription": "Սա վերծանված տեքստն է",
+  "title": "...",
+  "resolution": "...",
+  "languageCode": "hy-AM"
+}
+```
+
+### Polling rules to follow
+
+- **Cadence:** every **5–10 seconds** per in-flight job is the sweet spot. Most `single_voice` jobs finish in seconds; `phone_call` jobs may take a few minutes.
+- **Rate limit:** **60 requests / minute / API key**, fixed wall-clock-minute window (counter resets at the top of each minute, not as a rolling window).
+- **On `429`**: the response includes a `Retry-After` header (seconds until the next window opens). Sleep at least that long before retrying.
+- **Stop polling** once `status` is `transcribed` or `failed` — these are terminal.
+- **Cross-tenant safety:** if you ask about a `docId` that doesn't belong to your API key, you'll get a `404` (not `403`) — the same response as a docId that doesn't exist at all. This is intentional and you don't need to handle it specially.
+
+See the full [Get Transcription](/api-reference/endpoint/get-transcription) reference for every response field and error code.
+
+---
+
+## 📚 Notes & Constraints
+
+| Item | Value |
+| --- | --- |
+| File format | MP3 only (other formats are rejected) |
+| Upload URL validity | 1 hour from job creation |
+| Max duration | Limited by your account's remaining seconds |
+| Languages | Armenian (`hy-AM`) |
+| Transcription latency | Seconds (`single_voice`) to a few minutes (`phone_call`) |
+| Polling rate limit | 60 requests/minute per API key (fixed window) |
+| Webhook retries | None — implement idempotent handling on your side; fall back to polling if your receiver was down |
+
+---
+
+## 💻 End-to-End Code Examples
+
+### Python (requests)
+
+```python
+import os, time, requests
+
+API_KEY = os.environ["XOSUM_API_KEY"]
+BASE = "https://app.xosum.am/api"
+HEADERS = {"Authorization": f"Bearer {API_KEY}"}
+
+# 1. Create the job
+r = requests.post(
+    f"{BASE}/createTranscription",
+    json={"type": "single_voice", "metadata": {"filename": "my-audio.mp3"}},
+    headers=HEADERS,
+)
+r.raise_for_status()
+job = r.json()
+doc_id, upload_url = job["docId"], job["uploadUrl"]
+
+# 2. Upload the audio
+with open("my-audio.mp3", "rb") as f:
+    requests.put(upload_url, data=f).raise_for_status()
+
+# 3. Poll for the result
+while True:
+    r = requests.get(f"{BASE}/getTranscription", params={"docId": doc_id}, headers=HEADERS)
+    if r.status_code == 429:
+        time.sleep(int(r.headers.get("Retry-After", "5")))
+        continue
+    r.raise_for_status()
+    body = r.json()
+    if body["status"] == "transcribed":
+        print(body["transcription"])
+        break
+    if body["status"] == "failed":
+        raise RuntimeError(body.get("error", "Unknown error"))
+    time.sleep(7)
+```
+
+### Node.js (axios)
+
+```javascript
+import axios from "axios";
+import fs from "node:fs";
+
+const API_KEY = process.env.XOSUM_API_KEY;
+const BASE = "https://app.xosum.am/api";
+const headers = { Authorization: `Bearer ${API_KEY}` };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// 1. Create the job
+const { data: job } = await axios.post(
+  `${BASE}/createTranscription`,
+  { type: "single_voice", metadata: { filename: "my-audio.mp3" } },
+  { headers }
+);
+
+// 2. Upload the audio
+await axios.put(job.uploadUrl, fs.readFileSync("./my-audio.mp3"));
+
+// 3. Poll for the result
+while (true) {
+  try {
+    const { data } = await axios.get(`${BASE}/getTranscription`, {
+      params: { docId: job.docId },
+      headers,
+    });
+    if (data.status === "transcribed") {
+      console.log(data.transcription);
+      break;
+    }
+    if (data.status === "failed") {
+      throw new Error(data.error ?? "Unknown error");
+    }
+  } catch (err) {
+    if (err.response?.status === 429) {
+      await sleep(Number(err.response.headers["retry-after"] ?? 5) * 1000);
+      continue;
+    }
+    throw err;
+  }
+  await sleep(7000);
+}
+```
+
+---
+
+## 🧪 Testing
+
+1. Use [Postman](https://postman.com) or `curl` to simulate requests.
+2. For webhook testing, set a development URL like [webhook.site](https://webhook.site/) so you can inspect inbound payloads without standing up infrastructure.
+3. For polling, the recommended approach is to use the example loops above against a small test recording — the round-trip on a short `single_voice` clip is typically just a few seconds.
+
+---
+
+## 📞 Need Help?
+
+- **Don't have API access yet?** [Request it here](https://tally.so/r/3Evk5L?source=api_request_docs).
+- **Already a customer with a question?** Email [support@xosum.am](mailto:support@xosum.am) or [visit the docs](https://docs.xosum.am).

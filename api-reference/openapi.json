@@ -8,10 +8,8 @@ info:
     API access is exclusive to Business plan users. Authentication is handled via Bearer API keys.
   version: 1.0.0
 servers:
-  - url: https://app.xosum.am/api/
-    description: Production server for creating transcription jobs through public API
   - url: https://app.xosum.am
-    description: Web Application URL for viewing results
+    description: Production API server
 
 components:
   securitySchemes:
@@ -29,7 +27,14 @@ components:
         type:
           type: string
           enum: [single_voice, phone_call]
-          description: The type of audio to be transcribed. Use `single_voice` for monologues, `phone_call` for conversations.
+          description: >
+            The kind of audio being transcribed. This value also controls diarization
+            behavior in the resulting transcript:
+            `single_voice` returns a plain transcript with no speaker labels —
+            use this for monologues, dictations, voicemails, single-speaker recordings.
+            `phone_call` returns a diarized transcript with inline speaker labels
+            (`Խոսնակ 1:` / `Խոսնակ 2:`) and is pinned to exactly two speakers —
+            use this for two-party conversations such as support or sales calls.
         metadata:
           type: object
           description: Optional metadata to attach to the transcription (e.g., user IDs, external info).
@@ -55,6 +60,73 @@ components:
           format: uri
           description: A pre-signed URL for uploading the `.mp3` audio file using a PUT request. This URL is valid for 1 hour.
 
+    GetTranscriptionResponse:
+      type: object
+      description: >
+        Polling response for a transcription job. The base fields are always returned;
+        the additional fields below are populated only once `status` reaches a terminal
+        value (`transcribed` or `failed`).
+      required:
+        - docId
+        - status
+      properties:
+        docId:
+          type: string
+          description: The same ID returned by `POST /api/createTranscription`.
+        status:
+          type: string
+          enum: [uploading, processing, converting, transcribed, failed]
+          description: >
+            Current job state. Terminal states are `transcribed` and `failed`; clients
+            should stop polling once one is reached.
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO-8601 timestamp of when the job was created.
+        type:
+          type: string
+          enum: [single_voice, phone_call]
+          nullable: true
+          description: Echoes the `type` passed when the job was created.
+        duration:
+          type: number
+          nullable: true
+          description: Audio duration in seconds. Populated after the recording is processed.
+        metadata:
+          type: object
+          description: The same metadata object passed to `POST /api/createTranscription`.
+        transcription:
+          type: string
+          nullable: true
+          description: >
+            Present when `status` is `transcribed`. For `type: phone_call`, the text is
+            diarized with inline `Խոսնակ 1:` / `Խոսնակ 2:` speaker labels. For
+            `type: single_voice`, the text is plain with no labels.
+        title:
+          type: string
+          nullable: true
+          description: AI-generated short title. Present when `status` is `transcribed`.
+        resolution:
+          type: string
+          nullable: true
+          description: AI-generated one-paragraph summary. Present when `status` is `transcribed`.
+        languageCode:
+          type: string
+          nullable: true
+          description: BCP-47 language code of the detected language, e.g. `hy-AM`. Present when `status` is `transcribed`.
+        error:
+          type: string
+          nullable: true
+          description: Human-readable error message. Present when `status` is `failed`.
+
+    RateLimitError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Rate limit exceeded. Max 60 requests per minute.
+
     WebhookTranscriptionPayload:
       type: object
       properties:
@@ -70,7 +142,11 @@ components:
           description: Transcription job ID.
         transcription:
           type: string
-          description: The fully diarized text result of the transcription.
+          description: >
+            The transcript text. The JSON shape of this payload is identical regardless of
+            recording type, but the content of this field differs:
+            for `type: phone_call`, the text is diarized with inline `Խոսնակ 1:` / `Խոսնակ 2:`
+            speaker labels; for `type: single_voice`, the text is plain with no labels.
         metadata:
           type: object
           description: Metadata passed during creation.
@@ -177,6 +253,67 @@ paths:
           description: Unauthorized – missing or invalid API key.
         '403':
           description: Forbidden – The provided `checklistId` is invalid or does not belong to the authenticated user.
+        '500':
+          description: Server error.
+
+  /api/getTranscription:
+    get:
+      summary: Poll the status and result of a transcription job
+      description: >
+        Returns the current status and (once complete) the transcript for a `docId` returned
+        by `POST /api/createTranscription`. Use this as an alternative to webhook delivery
+        when hosting a public webhook receiver isn't an option (for example, when the
+        consumer is behind Cloudflare with IP-whitelisting requirements that the Xosum
+        Cloud Functions infrastructure can't satisfy).
+
+
+        **Recommended polling cadence:** every 5–10 seconds per in-flight job. Most
+        `single_voice` jobs finish within seconds; `phone_call` jobs may take a few minutes.
+
+
+        **Rate limit:** 60 requests per minute per API key, fixed wall-clock-minute window.
+        A `429` response includes a `Retry-After` header (seconds) indicating when the next
+        window opens — sleep at least that long before retrying.
+      operationId: getTranscription
+      tags:
+        - Transcription
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: docId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The document ID returned by `POST /api/createTranscription`.
+      responses:
+        '200':
+          description: Current status and (once complete) the transcript.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTranscriptionResponse'
+        '400':
+          description: Bad request — missing `docId` query parameter.
+        '401':
+          description: Unauthorized — missing or invalid API key.
+        '404':
+          description: >
+            Recording not found. Also returned when the `docId` exists but belongs to a
+            different user — this is intentional, to avoid leaking cross-tenant existence.
+        '405':
+          description: Method not allowed. Use `GET`.
+        '429':
+          description: Rate limit exceeded. The response includes a `Retry-After` header.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the next rate-limit window opens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
         '500':
           description: Server error.
 

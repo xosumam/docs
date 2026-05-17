@@ -1,0 +1,55 @@
+---
+title: 'Get Transcription'
+openapi: 'GET /api/getTranscription'
+---
+
+Poll for the status and result of a transcription job by its `docId`. This is the alternative to receiving the result via [your webhook](/api-reference/webhooks/transcription) — useful when you can't host a publicly reachable receiver (for example, when your network requires IP whitelisting that the Xosum Cloud Functions infrastructure can't provide).
+
+## Polling pattern
+
+Most jobs finish in seconds (`single_voice`) to a few minutes (`phone_call`). Poll every **5–10 seconds** until `status` becomes `transcribed` or `failed`, then stop.
+
+```bash
+curl -H "Authorization: Bearer $XOSUM_API_KEY" \
+  "https://app.xosum.am/api/getTranscription?docId=$DOC_ID"
+```
+
+```python Python
+import os, time, requests
+
+API_KEY = os.environ["XOSUM_API_KEY"]
+doc_id = "XYZ123"
+
+while True:
+    r = requests.get(
+        "https://app.xosum.am/api/getTranscription",
+        params={"docId": doc_id},
+        headers={"Authorization": f"Bearer {API_KEY}"},
+    )
+    if r.status_code == 429:
+        time.sleep(int(r.headers.get("Retry-After", "5")))
+        continue
+    r.raise_for_status()
+    body = r.json()
+    if body["status"] in ("transcribed", "failed"):
+        print(body)
+        break
+    time.sleep(7)
+```
+
+## Rate limit
+
+- **60 requests per minute per API key**, fixed wall-clock-minute window — the counter resets at the top of each minute, not as a rolling window.
+- On a `429` response, the `Retry-After` header tells you how many seconds until the next window opens. Sleep for at least that long before retrying.
+- The recommended 5–10 second cadence per in-flight job stays well under the limit for a handful of parallel jobs.
+
+## Response field availability
+
+The base fields (`docId`, `status`, `createdAt`, `type`, `duration`, `metadata`) are always returned. The fields below appear only once `status` reaches a terminal value:
+
+| When `status` is | Additional fields |
+| --- | --- |
+| `transcribed` | `transcription`, `title`, `resolution`, `languageCode` |
+| `failed` | `error` |
+
+The `transcription` field contains plain text when `type` is `single_voice` and diarized text with inline `Խոսնակ 1:` / `Խոսնակ 2:` speaker labels when `type` is `phone_call`.
