@@ -40,7 +40,65 @@
           {
             "group": "Սկսենք այստեղից",
             "pages": [
-              "index"
+              "index",
+              "guides/hy/getting-started",
+              "guides/hy/troubleshooting"
+            ]
+          },
+          {
+            "group": "Հիմնական գործիքներ",
+            "pages": [
+              "guides/hy/speech-to-text",
+              "guides/hy/transcripts",
+              "guides/hy/ai-tools",
+              "guides/hy/text-to-speech",
+              "guides/hy/history-reports",
+              "guides/hy/settings",
+              "guides/hy/ai-agents"
+            ]
+          },
+          {
+            "group": "Զանգերի կենտրոն",
+            "pages": [
+              "guides/hy/call-center/overview",
+              "guides/hy/call-center/checklists",
+              "guides/hy/call-center/run-analysis",
+              "guides/hy/call-center/bulk-upload",
+              "guides/hy/call-center/review-results"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Start here",
+            "pages": [
+              "guides/en/getting-started",
+              "guides/en/troubleshooting"
+            ]
+          },
+          {
+            "group": "Core tools",
+            "pages": [
+              "guides/en/speech-to-text",
+              "guides/en/transcripts",
+              "guides/en/ai-tools",
+              "guides/en/text-to-speech",
+              "guides/en/history-reports",
+              "guides/en/settings",
+              "guides/en/ai-agents"
+            ]
+          },
+          {
+            "group": "Call center",
+            "pages": [
+              "guides/en/call-center/overview",
+              "guides/en/call-center/checklists",
+              "guides/en/call-center/run-analysis",
+              "guides/en/call-center/bulk-upload",
+              "guides/en/call-center/review-results"
             ]
           }
         ]
